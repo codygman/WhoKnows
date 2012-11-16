@@ -1,0 +1,6 @@
+Idea pitch
+    - Web app
+    - Desktop Toggl? No longer necessarily a Web app, but with all bells and whistles
+    - Added feature: graphs over several weeks (overall time, or based on a project)
+    - Easier graphing features for past months or years
+    
