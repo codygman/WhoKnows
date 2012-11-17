@@ -39,7 +39,10 @@ def clean_stop_words(mystr):
     return filtered_string
 
 def lemmatize(wnl, cleaned_str):
-
+    list_of_tokens = cleaned_str.split(' ')
+    list_of_lemm_tok = filter(x: wnl.lemmatize(x), list_of_tokens)
+    lemm_str = ' '.join(list_of_lemm_tok)
+    return lemm_str
 
 def generate(mystr):
     # Assumption: garbled yet flat text; one huge string
@@ -54,15 +57,4 @@ def generate(mystr):
     wnl = WordNetLemmatizer()
     lemmatized_string = lemmatize(wnl, cleaned_string)
     return lemmatized_string
-
-    
-
-
-
-    
-
-
-
-    
-
 
