@@ -1,6 +1,8 @@
 CREATE TABLE professors (
 	id INTEGER PRIMARY KEY,
 	name text,
+	email text,
+	image_url text,
 	profile_full_text text,
 	dept text
 );

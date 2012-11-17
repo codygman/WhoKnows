@@ -49,7 +49,7 @@ class Search(tornado.web.RequestHandler):
         professors = []
 
         for s in stdout_list[0]:
-            # db row fetch
+           # db row fetch
             cur.execute("select email, image_url, dept from professors where id = ?", (s))
             rows = cur.fetchall()
             for row in rows:

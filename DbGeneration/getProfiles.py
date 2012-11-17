@@ -56,53 +56,64 @@ def get_all_profile_links(h):
     page_number = 0
 
     #sqlite db setup
-    con = sqlite3.connect('professors.db')
+    con = sqlite3.connect('professors.db.bak')
+    con2 = sqlite3.connect('professors.db')
     cur = con.cursor()
+    cur2 = con2.cursor()
 
-    profile_list_url = 'https://faculty.unt.edu/searchresults.php?faculty=true&search=+search+FPS...&searchtype=basic&image2.x=6&image2.y=4'
-    response, content = h.request(profile_list_url)
+    cur.execute("select link from profile_links;")
+    rows = cur.fetchall()
 
-    logging.info("First pages response status: %s" % (response['status']))
+    for row in rows:
+        print row[0]
+        sql = "insert into profile_links(type, link) values(?, ?);"
+        cur2.execute(sql, ("professor", row[0]) )
+        con2.commit()
 
-    # remember, header values are strings
-    while 1:
-        # end condition is no links being found on page
-        if page_number == 0:
-            # first page, don't need to set page variable
-            pass
-        else:
-            profile_list_url = 'https://faculty.unt.edu/searchresults.php?faculty=true&search=+search+FPS...&searchtype=basic&image2.x=6&image2.y=4&page=%d'\
-                    % (page_number)
-            logging.info("Getting <%s>" % (profile_list_url))
-            response, content = h.request(profile_list_url)
+    #profile_list_url = 'https://faculty.unt.edu/searchresults.php?faculty=true&search=+search+FPS...&searchtype=basic&image2.x=6&image2.y=4'
+    #response, content = h.request(profile_list_url)
 
-        # link example: https://faculty.unt.edu/editprofile.php?onlyview=1&pid=1938
-        profiles_only = SoupStrainer('a', href=re.compile('editprofile'))
-        soup = BeautifulSoup(content, parseOnlyThese=profiles_only)
-        all_links_for_page = make_links_absolute(soup, 'https://faculty.unt.edu')
+    #logging.info("First pages response status: %s" % (response['status']))
 
-        for link in all_links_for_page:
-            # also add to sqlite3 db
-            if link.get('href', None):
-                try:
-                    href = link.get('href')
-                    sql = "insert into profile_links(link, type) values(?, ?);"
-                    cur.execute(sql, (link.get('href'), "professor"))
-                    con.commit()
-                    logging.info("inserted: <%s> into profile_links"  % (href) )
-                except sqlite3.IntegrityError, e:
-                    logging.info("<%s> is a duplicate"  % (href) )
+    ## remember, header values are strings
+    #while 1:
+        ## end condition is no links being found on page
+        #if page_number == 0:
+            ## first page, don't need to set page variable
+            #pass
+        #else:
+            #profile_list_url = 'https://faculty.unt.edu/searchresults.php?faculty=true&search=+search+FPS...&searchtype=basic&image2.x=6&image2.y=4&page=%d'\
+                    #% (page_number)
+            #logging.info("Getting <%s>" % (profile_list_url))
+            #response, content = h.request(profile_list_url)
+
+        ## link example: https://faculty.unt.edu/editprofile.php?onlyview=1&pid=1938
+        #profiles_only = SoupStrainer('a', href=re.compile('editprofile'))
+        #soup = BeautifulSoup(content, parseOnlyThese=profiles_only)
+        #all_links_for_page = make_links_absolute(soup, 'https://faculty.unt.edu')
+
+        #for link in all_links_for_page:
+            ## also add to sqlite3 db
+            #if link.get('href', None):
+                #try:
+                    #href = link.get('href')
+                    #sql = "insert into profile_links(link, type) values(?, ?);"
+                    #cur.execute(sql, (link.get('href'), "professor"))
+                    #con.commit()
+                    #logging.info("inserted: <%s> into profile_links"  % (href) )
+                #except sqlite3.IntegrityError, e:
+                    #logging.info("<%s> is a duplicate"  % (href) )
                     
-        #[profile_links.add(link.get('href') for link in BeautifulSoup(content, parseOnlyThese=profiles_only)]
-        logging.debug("Got %d links on page %d" % (len(all_links_for_page), page_number))
+        ##[profile_links.add(link.get('href') for link in BeautifulSoup(content, parseOnlyThese=profiles_only)]
+        #logging.debug("Got %d links on page %d" % (len(all_links_for_page), page_number))
 
-        if len(all_links_for_page) == 0:
-            logging.debug("No links found on page %d, breaking" % (page_number))
-            break
-            logging.info("closing db connection")
-            con.close()
+        #if len(all_links_for_page) == 0:
+            #logging.debug("No links found on page %d, breaking" % (page_number))
+            #break
+            #logging.info("closing db connection")
+            #con.close()
 
-        page_number += 1
+        #page_number += 1
 
     logging.info("closing db connection")
     con.close()
@@ -112,7 +123,7 @@ class Professor:
     """
     TODO: Make sure that all publications are added
     """
-    def __init__(self, profile_url=None, name=None, dept=None, full_profile_text=None):
+    def __init__(self, profile_url=None, image_url=None, name=None, dept=None, full_profile_text=None):
         self.http = httplib2.Http(".cache", disable_ssl_certificate_validation=True)
         response = {}
         response['status'] = "404"
@@ -121,16 +132,19 @@ class Professor:
         if profile_url:
             response, self.profile_html = self.http.request(profile_url)
 
-        if response['status'] == "200" and url != None:
+        if response['status'] == "200" and profile_url != None:
             self.name = self.get_name()
-            self.publications = self.get_Publications()
+            #self.publications = self.get_Publications()
             self.dept = self.get_dept()
             self.full_profile_text = self.get_full_profile_text()
+            self.email = self.get_email()
+            self.image_url = self.get_image_url()
             self.save()
 
         if profile_url == None:
             self.name = name
             self.dept = dept
+            self.image_url = image_url
             self.full_profile_text = full_profile_text
 
     def __str__(self):
@@ -149,6 +163,21 @@ class Professor:
         logging.info("getting name for <%s>" % (self.url) )
         soup = BeautifulSoup(self.profile_html, parseOnlyThese=tds)
         return unescape(soup.find(text=True))
+
+    def get_image_url(self):
+        image_links = SoupStrainer('img', src=re.compile("images\/\d+\/.*jpg"))
+        link = BeautifulSoup(self.profile_html, parseOnlyThese=image_links)
+        if link.find():
+            print "image link: https://faculty.unt.edu/%s" % ( link.find().get('src') )
+            return "https://faculty.unt.edu/%s" % ( link.find().get('src') )
+        else:
+            return ""
+
+    def get_email(self):
+        mail = SoupStrainer('a', href=re.compile('mailto:'))
+        soup = BeautifulSoup(self.profile_html, parseOnlyThese=mail)
+        mail = soup.find(text=True)
+        return mail or ""
 
     def get_dept(self):
         """
@@ -204,16 +233,15 @@ class Professor:
                 logging.info("update profile_links set scraped = %s where link is %s;" %\
                     (0, self.url) )
 
-                cur.execute('insert into professors(name, profile_full_text, dept) values(?, ?, ?);',\
-                    (self.name, self.full_profile_text, self.dept) )
-
+                cur.execute('insert into professors(name, profile_full_text, dept, email, image_url) values(?, ?, ?, ?, ?);',\
+                    (self.name, self.full_profile_text, self.dept, self.email, self.image_url) )
 
                 con.commit()
 
-                logging.info('insert into professors(name, profile_full_text, dept) values("%s", "%s...", "%s");' %\
-                    (self.name, self.full_profile_text[:10], self.dept) )
-                logging.debug("saved: <name: %s>, <dept: %s>, <profile_full_text: %s>" %\
-                    (self.name, self.dept, self.full_profile_text[:10]) )
+                logging.info('insert into professors(name, profile_full_text, dept, email, image_url) values(%s, %s, %s, %s, %s);' %\
+                    (self.name, self.full_profile_text[:10], self.dept, self.email, self.image_url) )
+                logging.debug("saved: <name: %s>, <dept: %s>, <profile_full_text: %s>, <image_url: %s>, <email: %s>" %\
+                    (self.name, self.dept, self.full_profile_text[:10], self.image_url, self.email) )
 
             except sqlite3.IntegrityError, e:
                 cur.execute("update profile_links set scraped = ? where link is ?;", (1, self.url) )
@@ -233,22 +261,22 @@ def get_professors():
         
         cur.execute('select link from profile_links where type == "professor" and scraped is 0;')
         urls = [d[0] for d in cur.fetchall()]
+        print "Getting %d professors" % (len(urls))
 
         le_professors = [Professor(url) for url in urls]
-        with open('professor_data.json', 'w') as f:
-            f.write(json.dumps(le_professors))
+        #with open('professor_data.json', 'w') as f:
+        #    f.write(json.dumps(le_professors))
 
         #for professor in le_professors:
-        #    print professor.name, professor.publications
+            #print 'image_url: %s' % (professor.image_url)
 
 
 def write_professors_data():
     con = sqlite3.connect('professors.db')
 
     cur = con.cursor()
-    cur.execute('select name, dept, profile_full_text from professors')
+    cur.execute('select name, dept, profile_full_text, email, image_url from professors')
     rows = cur.fetchall()
-
 
     professors = []
 
@@ -261,8 +289,14 @@ def write_professors_data():
         #print "Professor<'%s', '%s', '%s'>" % (name, dept, full_profile_text)
         professor = Professor(profile_url=None, name=name, dept=dept, full_profile_text=full_profile_text)
         professor_data = \
-                {'name': professor.name, 'profile_url': professor.url, 'dept': professor.dept,\
-                'full_profile_text': professor.full_profile_text}
+                {
+                    'name': professor.name, 
+                    'dept': professor.dept, 
+                    'email': professor.email,
+                    'profile_url': professor.url,
+                    'image_url' : professor.image_url,
+                    'full_profile_text': professor.full_profile_text
+                    }
         professors.append(professor_data)
 
     with open('professor_data.json', 'wb') as f:
@@ -273,7 +307,7 @@ def write_professors_data():
 
 
 if __name__ == "__main__":
-    #get_professors()
-    #get_all_profile_links(h)
+    get_all_profile_links(h)
+    get_professors()
     write_professors_data()
 
