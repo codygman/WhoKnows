@@ -35,22 +35,26 @@ class Search(tornado.web.RequestHandler):
         keyword = self.get_argument('keyword')
         keyword = str(keyword.encode('latin-1', 'replace'))
 
-        pp = Popen('python fancyapi.py', shell=True, stdout=PIPE)
-        stdout_list = []
-        for ln in pp.stdout:
-            try:
-                stdout_list.append(ln)
-            except Exception, e:
-                pass
-
         #sqlite db setup
         con = sqlite3.connect('professors.db')
         cur = con.cursor()
         professors = []
 
-        for s in stdout_list[0]:
+        print keyword
+        # Gets related professor rows
+        # doesn't work right now, figure out how to query full text database
+        rows = cur.execute(\
+                "select ref_id from professors_text where professors_text MATCH ? limit 10",\
+                (keyword[0]))
+            #FIXME above: shouldn't have to call index of keyword
+        related_professor_ids = [str(r[0]) for r in rows.fetchall()]
+        print related_professor_ids
+
+        for s in related_professor_ids:
            # db row fetch
-            cur.execute("select email, image_url, dept from professors where id = ?", (s))
+            print "'%s': %s" % (s, type(s))
+            #FIXME: shouldn't have to call index of s
+            cur.execute("select email, image_url, dept from professors where id = ?;", (s[0]) )
             rows = cur.fetchall()
             for row in rows:
                 id = s
