@@ -11,3 +11,23 @@ Decided upon another project: 'WhoKnows'
     - results: the Webpages of experts on a given topic
     - user feedback
     - use that to re-weight features over time 
+
+Heuristics for finding personal pages - 
+    - ~ in the name of the page 
+    - get an index somehow
+
+Building a search engine
+
+Inverted Index
+key(word) -> person1, person2, ..., personN
+
+Auxiliary map from person to number to handle multiple people
+
+Data store
+
+Feature generation and machine learning 
+    - discuss each individual
+    - V dimensional vectors, the features would just be words
+    - input format - JSON? Database?
+    - output format - JSON? Database?
+
