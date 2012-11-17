@@ -13,6 +13,7 @@ To be run once; does not need to be run live
 
 import sys
 import json
+import shelve
 from nltk_get_tokens import generate
 from collections import defaultdict
 
@@ -50,6 +51,9 @@ def main():
         complain_and_die()
     people = parse_json(sys.argv[1])
     matrix = generate_token_vectors(people)
+    pers = shelve.open('people_matrix.db')
+    pers['1'] = matrix
+    pers.close()
 
 if __name__ == '__main__':
     main()
