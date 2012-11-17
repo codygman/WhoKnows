@@ -3,4 +3,10 @@ Idea pitch
     - Desktop Toggl? No longer necessarily a Web app, but with all bells and whistles
     - Added feature: graphs over several weeks (overall time, or based on a project)
     - Easier graphing features for past months or years
+
+Decided upon another project: 'WhoKnows'
+    - NLP/ IR
+    - scrape/ crawl UNT
+    - keyword based queries for now; may make it natural language later; and finally domain specific
+    - results: the Webpages of experts on a given topic
     
