@@ -26,8 +26,11 @@ Auxiliary map from person to number to handle multiple people
 Data store
 
 Feature generation and machine learning 
-    - discuss each individual
-    - V dimensional vectors, the features would just be words
+    - person to person_code mapper
+    - person to word, word to person - both types of matrices
+    - V dimensional vectors, the features would just be words (lowercased and stemmed)
+    - TF IDF, cosine similarity
     - input format - JSON? Database?
+        [ name: {}, profile_data: {}, dept: {}, profile_pic_link: {} ]
     - output format - JSON? Database?
 
