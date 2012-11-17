@@ -1,10 +1,68 @@
 """
 Get tokens from NLTK
 """
-from nltk import 
 
-def generate(str):
+import re
+from nltk.stem.wordnet import WordNetLemmatizer
+from nltk import word_tokenize
+
+def read_stop_words():
+    stop_words = []
+    with ('../common-english-words.txt' 'r') as fh:
+        contents = fh.read().split(',')
+        for c in contents:
+            # Cannot use extend, append is fine
+            stop_words.append(c)
+    return stop_words
+
+def clean_punctuation(mystr):
+    hyperlink = re.compile(r'\bhttp:\\/\\/.*\\/.+?\b')
+    twitter_entities = re.compile(r'@|#')
+    html_ent = re.compile(r'&amp;')
+    punctuation = re.compile(r',|\.|"|\'|\\|/|\||!|\?|:|')
+    alphanums = re.compile(r'\w+\d|\d+\w')
+
+    # not the best or perfect, but hey
+    mystr = re.sub(hyperlink, '', mystr)
+    mystr = re.sub(twitter_entities, '', mystr)
+    mystr = re.sub(punctuation, '', mystr)
+    mystr = re.sub(alphanums, '', mystr)
+    mystr = re.sub(html_ent, '', mystr)
+    return mystr
+    
+def clean_stop_words(mystr):
+    stop_words = read_stop_words()
+
+    token_list = str.split()
+    filtered_list = [w for w in token_list if w not in stop_words]
+    filtered_string = ' '.join(filtered_list)
+    return filtered_string
+
+def lemmatize(wnl, cleaned_str):
+
+
+def generate(mystr):
     # Assumption: garbled yet flat text; one huge string
+    # Need: 
+        # tokenization
+        # stop word removal
+        # lemmatization
+        # punctuation removal
+
+    filtered_string = clean_stop_words(mystr)
+    cleaned_string = clean_punctuation(filtered_string)
+    wnl = WordNetLemmatizer()
+    lemmatized_string = lemmatize(wnl, cleaned_string)
+    return lemmatized_string
+
+    
+
+
+
+    
+
+
+
     
 
 
