@@ -1,0 +1,320 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+
+
+<link rel="stylesheet" href="static/css/normalize.css"/>
+<link rel="stylesheet" href="static/css/main.css"/>
+
+<style type="text/css">
+
+body
+{	
+	background-image:url('/static/background.jpg');		
+}
+
+</style>
+
+<style type="text/css">
+.button
+{
+    position:relative;	
+	height:25px; 
+	margin:5px;
+	width:100px;
+	margin-left:auto;
+	margin-right:auto;
+	display:block;
+}
+.headerbar{
+	position:fixed;
+	z-index:1;
+    width: 102%;
+    height: 100px;
+    overflow:hidden;
+    margin-top:-135px;
+    text-align:center;
+    background-color:#55676a;
+    display:none;
+    padding:10px;  -moz-border-radius: 5px; -webkit-border-radius: 5px; border-radius: 5px; border-color:blue;
+
+}
+
+.searchbar{
+	margin-left:auto;
+	margin-right:auto;
+	display:block;
+	
+
+}
+
+.wrapper
+{
+
+    margin:125px;
+    background-color:#303f42;
+	margin-left:auto;
+    margin-right:auto;
+	width:80%;
+	height:2000px;
+	display:none;
+    padding:10px; -moz-border-radius: 5px; -webkit-border-radius: 5px; border-radius: 5px; border-color:blue;   	
+
+}
+.results
+{ 
+position:relative;
+   background-color:#55676a;
+   margin-left:auto;
+   margin-right:auto;
+   width:75%;   
+   height:200px;
+   padding:10px;
+   -moz-border-radius: 5px;
+   -webkit-border-radius: 5px; 
+   border-radius: 5px; 
+   border-color:blue;   	
+}
+.name
+{ 
+	margin-top:20px;
+    text-align:left;
+    background-color:#6C7A7D;
+    padding:2px; -moz-border-radius: 5px; -webkit-border-radius: 5px; border-radius: 5px; border-color:blue;   	
+
+}
+.email
+{
+  	text-align:left;
+    background-color:#303f42;
+    padding:2px; -moz-border-radius: 5px; -webkit-border-radius: 5px; border-radius: 5px; border-color:blue;   	
+    
+	
+}
+.website
+{
+ 	text-align:left;
+    background-color:#6C7A7D;
+    padding:2px; 
+    -moz-border-radius: 5px; 
+    -webkit-border-radius:5px; 
+    border-radius: 5px; 
+    border-color:blue;   	
+
+
+}
+
+.logo
+{  
+display:block;
+	margin-left:auto;
+	margin-right:auto;
+	height:300px;
+
+}
+
+</style>
+
+<script type="text/javascript" src="/static/jQuery.js"></script>
+
+
+<title>Who Knows? </title>
+
+<script type="text/javascript">
+var searchText= $("#searchbox").val();
+
+
+$(document).ready(function()
+{
+ $.ajax ({
+            async: true,
+            cache: false,    
+   	    type: 'post',
+	    url: 'cgi/manager.pl',
+	    data: {
+		 targetUrl : $('#search').val()
+		 //color: $('input:radio:checked').val();
+	    },
+            dataType: 'html',
+            success: function(data, statusText, xhr) {
+                console.log('Fired when the request is successful');
+		//$('#test').load(data);
+                //$('#test').html(data);
+		//$('#mainContent').html(data);
+		getJson(data);
+		//$("html").removeClass();		
+		//alert(data);
+  	    },
+            complete: function() {
+                console.log('Fired when the request is complete');
+            },
+            error: function(){
+            	alert('there was a problem with the request');
+            }
+        });
+});
+
+
+
+function getJson(data)
+{
+
+  
+  	var parseData = $.parseJSON(data);
+	
+	for(i=0 ; i < parseData.Results.length; i++)
+	{
+	    alert(parseData.Results.length);
+		var results = parseData.Results[i];
+	    $("#name").append("Name : " + results.name);
+	    $("#email").append("email : " + results.email);
+        $("#website").append("Website : " + results.website);
+        $("#profilepic").attr("src",function(){return results.profilepic;});
+        $("#results").appendTo("#wrapper");
+	}
+	
+	
+}
+//Get results back from server
+//via JSON and output them
+//to the divs being generated dynamically
+function generateResults()
+{
+ 
+$.getJSON('test.json', function(data) {
+  var items = [];
+  
+  $.each(data, function(key, val) {
+   	 $("#results").append("#wrapper");
+     $('body').append("results"); 
+	addData(key,val);	
+    
+ });
+
+});
+  
+ 
+
+}
+function addData(key,val)
+{
+if(key == "name")
+	{
+	  $("#name").append(key + " : " + val);
+	}
+   if(key =="email")
+   {
+   
+   	 $("#email").append(key + " : " + val);
+   }
+   if(key == "website")
+   {
+   
+   	$("#website").append(key + " : " + val);
+   }
+   if(key =="profilepic")
+   {
+     $("#profilepic").attr("src",function(){
+     
+     	return val;
+     	
+     });
+   }
+}
+function onClick()
+{
+   
+  //$("#results").empty();
+   hideMainPage();
+   showResultsPage();
+   //generateResults();
+   
+   //Get json object to pase in to be parsed
+   var data = '{ "Results" : [ { "email" : "proftest@gmail.com","name" : "Professor test","profilepic" : "http://demo.wuddupgames.com/Assets/Textures/negx.jpg","website" : "www.proftest.com"},{ "email" : "proftest@gmail.com","name" : "Professor test2","profilepic" : "http://demo.wuddupgames.com/Assets/Textures/negx.jpg", "website" : "www.proftest.com"} ] }';
+  //getJson(data);     
+      
+}  
+function hideMainPage()
+{
+    
+    
+	jQuery("#logo").fadeOut("slow");
+	jQuery("#searchbox").fadeOut("slow");
+	jQuery("#searchbutton").fadeOut("slow");
+    
+}
+function showResultsPage()
+{   
+	
+	jQuery("#headerbar").fadeIn("slow");
+	jQuery("#wrapper").fadeIn("slow");
+    
+}
+    
+//This will be where everything that needs to get sent off goes
+//such as the search string and any other type of server calls that need 
+//to be made 
+function sendSearchResults()
+{
+
+
+
+}
+
+
+
+</script>
+
+</head>
+
+
+<body>
+
+<img id="logo" src="/static/whoknowslogo2.png" alt="" class="logo" />
+
+
+<input id="searchbox"  onclick="if (event.keyCode == 13) document.getElementById('btnSearch').click()"type="text" maxlength="500" size="75" class="searchbar" />
+<button id="searchbutton" type="submit" class="button" onclick="onClick()">Search</button>
+
+<div visible="false" id="headerbar" class="headerbar"><p>New Search</p>
+
+<input id="searchboxheader"  onclick="if (event.keyCode == 13) document.getElementById('btnSearch').click()"type="text" maxlength="500" size="75" class="searchbar" />
+<button id="searchbuttonheader" type="submit" class="button" onclick="onClick()">Search</button>
+
+</div>
+<div visible="false" class="wrapper" id="wrapper">
+  <div visible="false" id="results" class="results">
+   <div visible="false" id ="info" >
+   
+    <div visible="false" id="name" class="name">
+      <img id="profilepic" alt="" width="50" height="50" align="right" />
+    	</div>
+     <div visible="false" id="email" class="email"></div>
+      <div visible="false" id="website" class="website"></div>
+    </div>
+    
+  
+    </div><!--this is the end of the entire results-->
+    
+     <div visible="false" id="results" class="results">
+   <div visible="false" id ="info" >
+   
+    <div visible="false" id="name" class="name">
+      <img id="profilepic" alt="" width="50" height="50" align="right" />
+    	</div>
+     <div visible="false" id="email" class="email"></div>
+      <div visible="false" id="website" class="website"></div>
+    </div>
+    
+     
+     
+     
+    
+       
+     </div>
+    </div>
+</body>
+
+</html>
