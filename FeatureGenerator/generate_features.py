@@ -41,6 +41,10 @@ def generate_token_vectors(people):
         vectors[ID]['tokens'] = vector
     return vectors
 
+def generate_inv_index(people):
+    """for scaling up, words as rows and people as columns"""
+    pass
+
 def main():
     if len(sys.argv) != 2:
         complain_and_die()
